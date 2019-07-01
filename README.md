@@ -1,7 +1,5 @@
 # Data-Project
 
-soon...
-
 ## 1.Contexte
 
 Depuis les années 90, il y a eu une véritable prise de conscience mondiale de la nécessité de réduire la consommation d’énergie et des émissions de gaz à effet de serre. Les premiers engagements sont apparus lors de la signature du protocole de Kyoto en 1997. Mais son entrée en vigueur n’a finalement eu lieu qu’en 2005 et de nombreux scientifiques ont jugé les efforts insuffisants pour ralentir le réchauffement climatique. Depuis, d’autres engagements plus ambitieux ont vus le jour (division par 4 des émissions d’ici 2050 pour la France par exemple, engagements de certaines grandes villes comme Paris). Mais la tâche est compliquée. Les pouvoirs publics et les collectivités territoriales n’ont pas la possibilité d’obliger les entreprises et les particuliers à changer leurs habitudes pour atteindre ces objectifs. L’action se porte donc avant tout à faire évoluer les comportements. L’économie et le recyclage des matières premières, l’amélioration des modes de transports et des performances énergétiques des bâtiments doivent devenir des priorités.
