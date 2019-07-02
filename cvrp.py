@@ -83,7 +83,8 @@ def main(argv):
 
     with open("algorithms.json".format(argv[1]), 'r') as json_file:
         algorithms = json.load(json_file)
-        algorithm = [algorithms['algorithms'][int(argv[1])], algorithms['heuristique'][int(argv[1])]]
+        algorithm = [algorithms['algorithms']
+                     [int(argv[1])], algorithms['heuristique'][int(argv[1])]]
 
     # Create the routing index manager.
     manager = pywrapcp.RoutingIndexManager(
@@ -125,9 +126,11 @@ def main(argv):
 
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     if algorithm[1] == "True":
-        search_parameters.first_solution_strategy = (eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
+        search_parameters.first_solution_strategy = (
+            eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
     else:
-        search_parameters.local_search_metaheuristic = (eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
+        search_parameters.local_search_metaheuristic = (
+            eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
         search_parameters.time_limit.seconds = 5
 
     search_parameters.log_search = True
