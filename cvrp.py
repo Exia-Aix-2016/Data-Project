@@ -46,6 +46,7 @@ def extract_solution(data, manager, routing, assignment):
         } for x in range(data['num_vehicles'])],
         "total_distance": 0,
         "total_load": 0,
+        "trucks_fleet": 0,
     }
 
     for vehicle_id in range(data['num_vehicles']):
@@ -68,6 +69,8 @@ def extract_solution(data, manager, routing, assignment):
             result["total_distance"] += distance
             result["total_load"] += load
 
+    result["trucks_fleet"] += data['num_vehicles']
+
     return result
 
 
@@ -77,6 +80,10 @@ def main(argv):
     # Instantiate the data problem.
     with open("datasets/{}.json".format(argv[0]), 'r') as json_file:
         data = json.load(json_file)
+
+    with open("algorithms.json".format(argv[1]), 'r') as json_file:
+        algorithms = json.load(json_file)
+        algorithm = [algorithms['algorithms'][int(argv[1])], algorithms['heuristique'][int(argv[1])]]
 
     # Create the routing index manager.
     manager = pywrapcp.RoutingIndexManager(
@@ -116,13 +123,13 @@ def main(argv):
         True,  # start cumul to zero
         'Capacity')
 
-    # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-    search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
-    # search_parameters.local_search_metaheuristic = (
-    #     routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
-    # search_parameters.time_limit.seconds = 30
+    if algorithm[1] == "True":
+        search_parameters.first_solution_strategy = (eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
+    else:
+        search_parameters.local_search_metaheuristic = (eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
+        search_parameters.time_limit.seconds = 5
+
     search_parameters.log_search = True
 
     startTime = datetime.now()
@@ -133,7 +140,7 @@ def main(argv):
     # Print solution on console.
     if assignment:
         solution = extract_solution(data, manager, routing, assignment)
-        with open("results/{}.json".format(argv[0]), 'w') as json_file:
+        with open("results/{}_{}.json".format(argv[0], algorithm[0]), 'w') as json_file:
             json.dump(solution, json_file, indent=2)
 
     print(elapsedTime.total_seconds())
