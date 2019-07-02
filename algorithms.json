@@ -1,0 +1,12 @@
+{
+    "algorithms":[
+        "PATH_CHEAPEST_ARC",
+        "TABU_SEARCH",
+        "GUIDED_LOCAL_SEARCH"
+    ],
+    "heuristique":[
+        "True",
+        "False",
+        "False"
+    ]
+}
