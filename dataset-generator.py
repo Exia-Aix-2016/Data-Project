@@ -21,15 +21,14 @@ def compute_euclidean_distance_matrix(locations):
     return distances
 
 
-def generate_distance_matrix(n):
+def generate_locations(n):
     locations = []
     for i in range(0, n):
         locations.append((
             randrange(0, 1000),
             randrange(0, 1000)
         ))
-
-    return compute_euclidean_distance_matrix(locations)
+    return locations
 
 
 def generate_demands(n, min, max):
@@ -66,7 +65,9 @@ def main(argv):
         cities, city_demand_min, city_demand_max, trucks, truck_capacity))
 
     data = {}
-    data['distance_matrix'] = generate_distance_matrix(cities)
+
+    data['locations'] = generate_locations(cities)
+    data['distance_matrix'] = compute_euclidean_distance_matrix(data['locations'])
     data['demands'] = generate_demands(
         cities, city_demand_min, city_demand_max)
     data['vehicle_capacities'] = generate_vehicle_capacities(

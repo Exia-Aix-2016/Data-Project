@@ -36,6 +36,41 @@ def print_solution(data, manager, routing, assignment):
     print('Total load of all routes: {}'.format(total_load))
 
 
+def extract_solution(data, manager, routing, assignment):
+    """Prints assignment on console."""
+    result = {
+        "vehicles": [{
+            "route": [],
+            "distance": 0,
+            "load": 0
+        } for x in range(data['num_vehicles'])],
+        "total_distance": 0,
+        "total_load": 0,
+    }
+
+    for vehicle_id in range(data['num_vehicles']):
+        index = routing.Start(vehicle_id)
+        while not routing.IsEnd(index):
+            node_index = manager.IndexToNode(index)
+            previous_index = index
+            index = assignment.Value(routing.NextVar(index))
+            distance = routing.GetArcCostForVehicle(
+                previous_index, index, vehicle_id)
+            load = data['demands'][node_index]
+            result["vehicles"][vehicle_id]["route"].append({
+                "id": node_index,
+                "load": load,
+                "distance": distance,
+                "location": data["locations"][node_index]
+            })
+            result["vehicles"][vehicle_id]["distance"] += distance
+            result["vehicles"][vehicle_id]["load"] += load
+            result["total_distance"] += distance
+            result["total_load"] += load
+
+    return result
+
+
 def main(argv):
     """Solve the CVRP problem."""
 
@@ -97,7 +132,9 @@ def main(argv):
 
     # Print solution on console.
     if assignment:
-        print_solution(data, manager, routing, assignment)
+        solution = extract_solution(data, manager, routing, assignment)
+        with open("results/{}.json".format(argv[0]), 'w') as json_file:
+            json.dump(solution, json_file, indent=2)
 
     print(elapsedTime.total_seconds())
 
