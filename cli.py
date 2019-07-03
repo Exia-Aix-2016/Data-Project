@@ -187,7 +187,12 @@ class VisualizationMenu(Menu):
             {
             'name': 'Quality chart',
             'value': 'QUALITY_CHART'
-        }]
+        }, {
+            'name': 'Complexity chart',
+            'value': 'COMPLEXITY_CHART'
+
+        }
+        ]
 
     def on_action(self, action):
         if action == "GRAPH" or action == "GRAPH_NO_DEPOT":
@@ -197,6 +202,8 @@ class VisualizationMenu(Menu):
             graph.show()
         elif action == "QUALITY_CHART":
             self.chart.showQuality()
+        elif action == "COMPLEXITY_CHART":
+            self.chart.showComplexity()
 
 
 class MainMenu(Menu):

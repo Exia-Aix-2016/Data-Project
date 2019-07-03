@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerLine2D
 import numpy as np
 import pylab
 import sys
@@ -46,12 +47,10 @@ class Chart:
 
         plt.bar(x, quality, width, color=(0.65098041296005249,
                                           0.80784314870834351, 0.89019608497619629, 1.0))
-        #plt.scatter([i+width/2.0 for i in x],height,color='k',s=40)
 
         plt.xlim(0, 4)
         plt.ylim(0, sorted(quality, reverse=True)[
             0] + sorted(quality, reverse=True)[0] * 0.1)
-        # plt.grid()
 
         plt.title('Quality Diagram')
 
@@ -59,3 +58,23 @@ class Chart:
 
         # plt.savefig('SimpleBar.png')
         plt.show()
+
+    def showComplexity(self):
+
+        color = ['r','b','g']
+        i = 0
+        
+        for algorithm, values in self.store.complexity.items():
+            x = []
+            y = []
+            for point in values:
+                x.append(point['cities'])
+                y.append(point['duration'])
+            curve = plt.plot(x, y, color[i], algorithm)
+            x.clear()
+            y.clear()
+            i += 1
+
+        pylab.legend(loc='upper left')
+        plt.show()
+
