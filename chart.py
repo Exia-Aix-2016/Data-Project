@@ -41,7 +41,6 @@ class Chart:
                            * (trucks_used / trucks_fleet))
             trucks_used = 0
 
-        fig = plt.figure()
         x = [1, 2, 3]
         width = 0.5
 
@@ -49,8 +48,7 @@ class Chart:
                                           0.80784314870834351, 0.89019608497619629, 1.0))
 
         plt.xlim(0, 4)
-        plt.ylim(0, sorted(quality, reverse=True)[
-            0] + sorted(quality, reverse=True)[0] * 0.1)
+        plt.ylim(0, sorted(quality, reverse=True)[0] * 1.1)
 
         plt.title('Quality Diagram')
 
@@ -72,8 +70,49 @@ class Chart:
 
         plt.xlabel("Nodes")
         plt.ylabel("Time")
-
         plt.legend()
+        
+        plt.title('Complexity Diagram')
+        plt.show()
+
+    def showUniformity(config):
+        x = []
+        y = []
+        i = 0
+
+        for stat in config['stats']:
+            i += 1
+            x.append(i)
+            y.append(stat['execution_time'])
+    
+        width = 0.5
+
+        plt.bar(x, y, width, color=(0.65098041296005249,
+                                          0.80784314870834351, 0.89019608497619629, 1.0))
+
+        plt.xlim(0, len(x) + 1)
+        plt.ylim(0, sorted(y, reverse=True)[0] * 1.1)
+
+        plt.title('Uniformity Diagram')
+        plt.ylabel("Time")
+
+        pylab.xticks(x, self.store.solutions.keys(), rotation=20)
 
         plt.show()
 
+    def showScatterPlot(stat):
+        x = []
+        y = []
+
+        for bundles in stat:
+            for bundle in bundles['stats']:
+                x.append(bundles['cities'])
+                y.append(bundle['execution_time'])
+                        
+            plt.scatter( 'x', 'y', data=df, linestyle='', marker='o')
+
+        plt.xlabel('Cities')
+        plt.ylabel('Time')
+        plt.title('Scatter Plot Diagram')
+
+        plt.show()
