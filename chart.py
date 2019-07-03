@@ -60,9 +60,6 @@ class Chart:
         plt.show()
 
     def showComplexity(self):
-
-        color = ['r','b','g']
-        i = 0
         
         for algorithm, values in self.store.complexity.items():
             x = []
@@ -70,11 +67,13 @@ class Chart:
             for point in values:
                 x.append(point['cities'])
                 y.append(point['duration'])
-            curve = plt.plot(x, y, color[i], algorithm)
-            x.clear()
-            y.clear()
-            i += 1
 
-        pylab.legend(loc='upper left')
+            plt.plot(x, y, label=algorithm)
+
+        plt.xlabel("Nodes")
+        plt.ylabel("Time")
+
+        plt.legend()
+
         plt.show()
 
