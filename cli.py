@@ -31,6 +31,9 @@ def whenMenu(m):
 def toInt(val): return int(val)
 
 
+def toFloat(val): return float(val)
+
+
 class Store:
     data = None
     solutions = None
@@ -254,9 +257,34 @@ class MainMenu(Menu):
         if action == "visualize":
             self.visualizationMenu.execute()
         if action == "complexity":
+            answers = prompt([
+                {
+                    "type": "input",
+                    "message": "How many cities do you want from ?",
+                    "name": "city_start",
+                    "filter": toInt
+                }, {
+                    "type": "input",
+                    "message": "How many cities do you want to ?",
+                    "name": "city_stop",
+                    "filter": toInt
+                }, {
+                    "type": "input",
+                    "message": "Which step ratio ?",
+                    "name": "step",
+                    "default": "0.1",
+                    "filter": toFloat
+                }, {
+                    "type": "input",
+                    "message": "Which time limit ?",
+                    "name": "time_limit",
+                    "default": "60",
+                    "filter": toInt
+                }
+            ])
             with self.spinner:
                 self.store.complexity = Complexity(
-                    10, 500, 0.1, 30).get_complexity()
+                    answers["city_start"], answers["city_stop"], answers["step"], answers["time_limit"]).get_complexity()
 
 
 if __name__ == "__main__":
