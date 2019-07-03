@@ -6,6 +6,7 @@ from ortools.constraint_solver import pywrapcp
 from datetime import datetime, time, timedelta
 import sys
 import json
+import time
 from threading import Thread
 
 
@@ -18,6 +19,7 @@ class CVRP(Thread):
         self.first_solution_strategy = first_solution_strategy
         self.local_search_metaheuristic = local_search_metaheuristic
         self.time_limit = time_limit
+        self.executionTime = 0
 
     def run(self):
         # Create the routing index manager.
@@ -73,10 +75,15 @@ class CVRP(Thread):
 
         startTime = datetime.now()
 
+        # Start time benchmark
+        self.executionTime = time.time()
         # Solve the problem.
         assignment = self.routing.SolveWithParameters(self.search_parameters)
 
         elapsedTime = datetime.now() - startTime
+
+        # Result time benchmark
+        self.executionTime = time.time() - self.executionTime
 
         # Parse the solution.
         if assignment:
@@ -94,6 +101,7 @@ class CVRP(Thread):
             "total_distance": 0,
             "total_load": 0,
             "trucks_fleet": 0,
+            "execution_time": 0,
         }
 
         for vehicle_id in range(self.data['num_vehicles']):
@@ -117,5 +125,6 @@ class CVRP(Thread):
                 result["total_load"] += load
 
         result["trucks_fleet"] += self.data['num_vehicles']
+        result["execution_time"] += self.executionTime
 
         return result
