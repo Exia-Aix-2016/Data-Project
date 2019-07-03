@@ -109,7 +109,7 @@ class Chart:
                 x.append(bundles['cities'])
                 y.append(bundle['execution_time'])
                         
-            plt.scatter( 'x', 'y', data=df, linestyle='', marker='o')
+            plt.scatter(x, y, linestyle='', marker='o')
 
         plt.xlabel('Cities')
         plt.ylabel('Time')
