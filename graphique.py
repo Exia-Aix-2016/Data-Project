@@ -7,31 +7,56 @@ import json
 
 
 def graphiqueQuality(argv):
-    # algorithms = {}
-
     with open("algorithms.json".format(), 'r') as json_file:
         data = json.load(json_file)
         algorithms = data['algorithms']
+        
+    trucks_fleet = 0
+    trucks_used = 0
+    total_distance = 0
+    whole_distance = 0
 
-    for algorithm in algorithms
+    quality = []
+
+    test = []
+    
+
+    for algorithm in algorithms:
+        with open("results/{}_{}.json".format(argv[1], algorithm), 'r') as json_file:
+            data = json.load(json_file)
+            trucks_fleet = int(data['trucks_fleet'])
+            total_distance = int(data['total_distance'])
+            trucks_used = len(data["vehicles"])
+        
+        with open("datasets/{}.json".format(argv[1]), 'r') as json_file:
+            data = json.load(json_file)
+            whole_distance = 0
+            indexX = 0
+            indexY = 0
+            for i in data["distance_matrix"]:
+                for j in i:
+                    if indexX > indexY:
+                        whole_distance += j
+                    indexX += 1
+                indexX = 0
+                indexY += 1
+
+        quality.append( (total_distance / whole_distance) * (trucks_used / trucks_fleet) )   
 
     fig = plt.figure()
-    x = [1,2,3,4,5,6,7,8,9,10]
-    height = [8,12,8,5,4,3,2,1,2,4]
-    width = 0.05
-    BarName = ['a','b','c','d','e','f','g','h','i','j']
+    x = [1,2,3]
+    width = 0.5
 
-    plt.bar(x, height, width, color=(0.65098041296005249, 0.80784314870834351, 0.89019608497619629, 1.0) )
-    plt.scatter([i+width/2.0 for i in x],height,color='k',s=40)
+    plt.bar(x, quality, width, color=(0.65098041296005249, 0.80784314870834351, 0.89019608497619629, 1.0) )
+    #plt.scatter([i+width/2.0 for i in x],height,color='k',s=40)
 
-    plt.xlim(0,11)
-    plt.ylim(0,14)
-    plt.grid()
+    plt.xlim(0,4)
+    plt.ylim(0,sorted(quality, reverse=True)[0] + sorted(quality, reverse=True)[0] * 0.1)
+    #plt.grid()
 
-    plt.ylabel('Counts')
-    plt.title('Diagramme en Batons !')
+    plt.title('Quality Diagram')
 
-    pylab.xticks(x, BarName, rotation=40)
+    pylab.xticks(x, algorithms, rotation=20)
 
     # plt.savefig('SimpleBar.png')
     plt.show()
