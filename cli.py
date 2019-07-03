@@ -35,7 +35,7 @@ class Store:
     data = None
     solutions = None
     sid = None
-    complexity: None
+    complexity = None
 
 
 class Menu():
@@ -177,22 +177,28 @@ class VisualizationMenu(Menu):
         self.chart = Chart(store)
 
     def get_choices(self):
-        return [{
-            'name': 'Graph',
-            'value': 'GRAPH'
-        }, {
-            'name': 'Graph without depot',
-            'value': 'GRAPH_NO_DEPOT'
-        },
-            {
-            'name': 'Quality chart',
-            'value': 'QUALITY_CHART'
-        }, {
-            'name': 'Complexity chart',
-            'value': 'COMPLEXITY_CHART'
+        choices = []
+        if self.store.solutions:
+            choices.append({
+                'name': 'Graph',
+                'value': 'GRAPH'
+            })
+            choices.append({
+                'name': 'Graph without depot',
+                'value': 'GRAPH_NO_DEPOT'
+            })
+            choices.append({
+                'name': 'Quality chart',
+                'value': 'QUALITY_CHART'
+            })
 
-        }
-        ]
+        if self.store.complexity:
+            choices.append({
+                'name': 'Complexity chart',
+                'value': 'COMPLEXITY_CHART'
+            })
+
+        return choices
 
     def on_action(self, action):
         if action == "GRAPH" or action == "GRAPH_NO_DEPOT":
@@ -230,7 +236,7 @@ class MainMenu(Menu):
             'value': 'complexity',
         })
 
-        if self.store.solutions:
+        if self.store.solutions or self.store.complexity:
             choices.append({
                 'name': 'Visualize the solution',
                 'value': 'visualize',
@@ -250,8 +256,7 @@ class MainMenu(Menu):
         if action == "complexity":
             with self.spinner:
                 self.store.complexity = Complexity(
-                    10, 200, 0.3).get_complexity()
-                print(self.store.complexity)
+                    10, 500, 0.1, 30).get_complexity()
 
 
 if __name__ == "__main__":
