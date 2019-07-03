@@ -71,25 +71,17 @@ class CVRP(Thread):
         if self.time_limit:
             self.search_parameters.time_limit.seconds = self.time_limit
 
-        self.search_parameters.log_search = True
+        # self.search_parameters.log_search = True
 
-        startTime = datetime.now()
-
-        # Start time benchmark
         self.executionTime = time.time()
         # Solve the problem.
         assignment = self.routing.SolveWithParameters(self.search_parameters)
 
-        elapsedTime = datetime.now() - startTime
-
         # Result time benchmark
         self.executionTime = time.time() - self.executionTime
-
         # Parse the solution.
         if assignment:
             self.solution = self.parse_solution(assignment)
-
-        print(elapsedTime.total_seconds())
 
     def parse_solution(self, assignment):
         result = {
