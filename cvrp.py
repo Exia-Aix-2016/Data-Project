@@ -6,6 +6,7 @@ from ortools.constraint_solver import pywrapcp
 from datetime import datetime, time, timedelta
 import sys
 import json
+import time
 
 
 def print_solution(data, manager, routing, assignment):
@@ -36,7 +37,7 @@ def print_solution(data, manager, routing, assignment):
     print('Total load of all routes: {}'.format(total_load))
 
 
-def extract_solution(data, manager, routing, assignment):
+def extract_solution(data, manager, routing, assignment, execution_time):
     """Prints assignment on console."""
     result = {
         "vehicles": [{
@@ -47,6 +48,7 @@ def extract_solution(data, manager, routing, assignment):
         "total_distance": 0,
         "total_load": 0,
         "trucks_fleet": 0,
+        "execution_time": 0,
     }
 
     for vehicle_id in range(data['num_vehicles']):
@@ -68,6 +70,7 @@ def extract_solution(data, manager, routing, assignment):
             result["vehicles"][vehicle_id]["load"] += load
             result["total_distance"] += distance
             result["total_load"] += load
+            result["execution_time"] += execution_time
 
     result["trucks_fleet"] += data['num_vehicles']
 
@@ -83,7 +86,8 @@ def main(argv):
 
     with open("algorithms.json".format(argv[1]), 'r') as json_file:
         algorithms = json.load(json_file)
-        algorithm = [algorithms['algorithms'][int(argv[1])], algorithms['heuristique'][int(argv[1])]]
+        algorithm = [algorithms['algorithms']
+                     [int(argv[1])], algorithms['heuristique'][int(argv[1])]]
 
     # Create the routing index manager.
     manager = pywrapcp.RoutingIndexManager(
@@ -125,21 +129,28 @@ def main(argv):
 
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     if algorithm[1] == "True":
-        search_parameters.first_solution_strategy = (eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
+        search_parameters.first_solution_strategy = (
+            eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
     else:
-        search_parameters.local_search_metaheuristic = (eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
+        search_parameters.local_search_metaheuristic = (
+            eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
         search_parameters.time_limit.seconds = 5
 
     search_parameters.log_search = True
 
+    t0 = time.time()
+
+    # Execution time
     startTime = datetime.now()
     # Solve the problem.
     assignment = routing.SolveWithParameters(search_parameters)
     elapsedTime = datetime.now() - startTime
 
+    executionTime = time.time() - t0
     # Print solution on console.
     if assignment:
-        solution = extract_solution(data, manager, routing, assignment)
+        solution = extract_solution(
+            data, manager, routing, assignment, executionTime)
         with open("results/{}_{}.json".format(argv[0], algorithm[0]), 'w') as json_file:
             json.dump(solution, json_file, indent=2)
 
