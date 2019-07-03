@@ -6,7 +6,6 @@ def solution_stat(solution):
         "distance": 0,
         "trucks": 0
     }
-    print("test")
     result["distance"] = solution["total_distance"]
     result["execution_time"] = solution["execution_time"]
 
