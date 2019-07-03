@@ -58,7 +58,7 @@ class Chart:
         plt.show()
 
     def showComplexity(self):
-        
+
         for algorithm, values in self.store.complexity.items():
             x = []
             y = []
@@ -71,11 +71,11 @@ class Chart:
         plt.xlabel("Nodes")
         plt.ylabel("Time")
         plt.legend()
-        
+
         plt.title('Complexity Diagram')
         plt.show()
 
-    def showUniformity(config):
+    def showUniformity(self, config):
         x = []
         y = []
         i = 0
@@ -84,11 +84,11 @@ class Chart:
             i += 1
             x.append(i)
             y.append(stat['execution_time'])
-    
+
         width = 0.5
 
         plt.bar(x, y, width, color=(0.65098041296005249,
-                                          0.80784314870834351, 0.89019608497619629, 1.0))
+                                    0.80784314870834351, 0.89019608497619629, 1.0))
 
         plt.xlim(0, len(x) + 1)
         plt.ylim(0, sorted(y, reverse=True)[0] * 1.1)
@@ -96,11 +96,9 @@ class Chart:
         plt.title('Uniformity Diagram')
         plt.ylabel("Time")
 
-        pylab.xticks(x, self.store.solutions.keys(), rotation=20)
-
         plt.show()
 
-    def showScatterPlot(stat):
+    def showScatterPlot(self, stat):
         x = []
         y = []
 
@@ -108,8 +106,8 @@ class Chart:
             for bundle in bundles['stats']:
                 x.append(bundles['cities'])
                 y.append(bundle['execution_time'])
-                        
-            plt.scatter(x, y, linestyle='', marker='o')
+
+            plt.scatter(x, y)
 
         plt.xlabel('Cities')
         plt.ylabel('Time')

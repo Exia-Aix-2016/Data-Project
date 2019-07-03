@@ -12,6 +12,7 @@ import json
 from chart import Chart
 from cvrpg import CVRPG
 from complexity import Complexity
+from runner import Runner
 
 
 class NumberValidator(Validator):
@@ -39,6 +40,17 @@ class Store:
     solutions = None
     sid = None
     complexity = None
+    stats = None
+
+    def first_solution_strategy(self):
+        if self.sid == "PATH_CHEAPEST_ARC":
+            return routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
+
+    def local_search_metaheuristic(self):
+        if self.sid == "GUIDED_LOCAL_SEARCH":
+            return routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+        elif self.sid == "TABU_SEARCH":
+            return routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH
 
 
 class Menu():
@@ -163,10 +175,11 @@ class DatasetMenu(Menu):
 
 class SelectAlgoMenu(Menu):
     def get_choices(self):
-        return list(map(lambda algo: {
-            'name': algo,
-            'value': algo,
-        }, self.store.solutions.keys()))
+        return [
+            {"name": "GUIDED_LOCAL_SEARCH", "value": "GUIDED_LOCAL_SEARCH"},
+            {"name": "TABU_SEARCH", "value": "TABU_SEARCH"},
+            {"name": "PATH_CHEAPEST_ARC", "value": "PATH_CHEAPEST_ARC"}
+        ]
 
     def on_action(self, action):
         self.store.sid = action
@@ -215,12 +228,57 @@ class VisualizationMenu(Menu):
             self.chart.showComplexity()
 
 
+class StatMenu(Menu):
+    def __init__(self, store):
+        Menu.__init__(self, store)
+        self.selectAlgoMenu = SelectAlgoMenu(store)
+        self.chart = Chart(store)
+
+    def get_choices(self):
+        return [
+            {
+                'name': 'Show scatter plot',
+                'value': 'SCATTER_PLOT'
+            },
+            {
+                'name': 'Show uniformity',
+                'value': 'UNIFORMITY'
+            }
+        ]
+
+        # choices = [{
+        #     'name': 'Generate stats',
+        #     'value': 'GENERATE'
+        # }]
+
+        # if self.store.stats:
+        #     choices.append({
+        #         'name': 'Show scatter plot',
+        #         'value': 'SCATTER_PLOT'
+        #     })
+
+    def on_action(self, action):
+        if action == "SCATTER_PLOT":
+            self.selectAlgoMenu.execute()
+            with self.spinner:
+                stats = Runner(iterations=3, cities_start=10, cities_stop=200, local_search_metaheuristic=self.store.local_search_metaheuristic(
+                ), first_solution_strategy=self.store.first_solution_strategy()).get_stats()
+            self.chart.showScatterPlot(stats)
+        elif action == "UNIFORMITY":
+            self.selectAlgoMenu.execute()
+            with self.spinner:
+                stats = Runner(cities=500, local_search_metaheuristic=self.store.local_search_metaheuristic(
+                ), first_solution_strategy=self.store.first_solution_strategy()).get_stats()
+            self.chart.showUniformity(stats[0])
+
+
 class MainMenu(Menu):
 
     def __init__(self, store):
         Menu.__init__(self, store, loop=True)
         self.datasetMenu = DatasetMenu(store)
         self.visualizationMenu = VisualizationMenu(store)
+        self.statMenu = StatMenu(store)
 
     def get_choices(self):
         choices = [{
@@ -244,6 +302,11 @@ class MainMenu(Menu):
                 'name': 'Visualize the solution',
                 'value': 'visualize',
             })
+
+        choices.append({
+            'name': 'Stats',
+            'value': 'stats',
+        })
 
         return choices
 
@@ -285,6 +348,8 @@ class MainMenu(Menu):
             with self.spinner:
                 self.store.complexity = Complexity(
                     answers["city_start"], answers["city_stop"], answers["step"], answers["time_limit"]).get_complexity()
+        elif action == "stats":
+            self.statMenu.execute()
 
 
 if __name__ == "__main__":
