@@ -17,8 +17,6 @@ def graphiqueQuality(argv):
     whole_distance = 0
 
     quality = []
-
-    test = []
     
 
     for algorithm in algorithms:
@@ -26,7 +24,10 @@ def graphiqueQuality(argv):
             data = json.load(json_file)
             trucks_fleet = int(data['trucks_fleet'])
             total_distance = int(data['total_distance'])
-            trucks_used = len(data["vehicles"])
+            
+            for truck in data["vehicles"]:
+                if(len(truck["route"]) > 1):
+                    trucks_used += 1 
         
         with open("datasets/{}.json".format(argv[1]), 'r') as json_file:
             data = json.load(json_file)
@@ -41,7 +42,8 @@ def graphiqueQuality(argv):
                 indexX = 0
                 indexY += 1
 
-        quality.append( (total_distance / whole_distance) * (trucks_used / trucks_fleet) )   
+        quality.append( (total_distance / whole_distance) * (trucks_used / trucks_fleet) )
+        trucks_used = 0
 
     fig = plt.figure()
     x = [1,2,3]
