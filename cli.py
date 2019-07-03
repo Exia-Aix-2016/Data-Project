@@ -5,12 +5,13 @@ from halo import Halo
 import time
 import asyncio
 from threading import Thread
-from crvp2 import CVRP
 from ortools.constraint_solver import routing_enums_pb2
 from generator import Generator
 from graph import Graph
 import json
 from chart import Chart
+from cvrpg import CVRPG
+from complexity import Complexity
 
 
 class NumberValidator(Validator):
@@ -34,6 +35,7 @@ class Store:
     data = None
     solutions = None
     sid = None
+    complexity: None
 
 
 class Menu():
@@ -130,18 +132,13 @@ class DatasetMenu(Menu):
                     'default': "5"
                 }
             ])
-            generator = Generator(answers["cities"],
-                                  answers["trucks"],
-                                  answers["truck_capacity"],
-                                  answers["city_demand_min"],
-                                  answers["city_demand_max"])
 
-            generator.start()
-            self.spinner.start()
-            generator.join()
-            self.spinner.stop()
-
-            self.store.data = generator.data
+            with self.spinner:
+                self.store.data = Generator(answers["cities"],
+                                            answers["trucks"],
+                                            answers["truck_capacity"],
+                                            answers["city_demand_min"],
+                                            answers["city_demand_max"]).get_data()
 
         elif action == "import" or action == "export":
             filename = prompt([
@@ -221,6 +218,11 @@ class MainMenu(Menu):
                 'value': 'process',
             })
 
+        choices.append({
+            'name': 'Find a complexity',
+            'value': 'complexity',
+        })
+
         if self.store.solutions:
             choices.append({
                 'name': 'Visualize the solution',
@@ -233,25 +235,16 @@ class MainMenu(Menu):
         if action == "dataset":
             self.datasetMenu.execute()
         if action == "process":
-            crvps = {
-                "GUIDED_LOCAL_SEARCH": CVRP(
-                    self.store.data, local_search_metaheuristic=routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH, time_limit=5),
-                "TABU_SEARCH": CVRP(
-                    self.store.data, local_search_metaheuristic=routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH, time_limit=5),
-                "PATH_CHEAPEST_ARC": CVRP(
-                    self.store.data, first_solution_strategy=routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
-            }
-
-            for key, crvp in crvps.items():
-                crvp.start()
-
             with self.spinner:
-                self.store.solutions = {}
-                for key, crvp in crvps.items():
-                    crvp.join()
-                    self.store.solutions[key] = crvp.solution
+                self.store.solutions = CVRPG(
+                    self.store.data, 5).get_solutions()
         if action == "visualize":
             self.visualizationMenu.execute()
+        if action == "complexity":
+            with self.spinner:
+                self.store.complexity = Complexity(
+                    10, 200, 0.3).get_complexity()
+                print(self.store.complexity)
 
 
 if __name__ == "__main__":

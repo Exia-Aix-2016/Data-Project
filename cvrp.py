@@ -7,155 +7,116 @@ from datetime import datetime, time, timedelta
 import sys
 import json
 import time
+from threading import Thread
 
 
-def print_solution(data, manager, routing, assignment):
-    """Prints assignment on console."""
-    total_distance = 0
-    total_load = 0
-    for vehicle_id in range(data['num_vehicles']):
-        index = routing.Start(vehicle_id)
-        plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
-        route_distance = 0
-        route_load = 0
-        while not routing.IsEnd(index):
-            node_index = manager.IndexToNode(index)
-            route_load += data['demands'][node_index]
-            plan_output += ' {0} Load({1}) -> '.format(node_index, route_load)
-            previous_index = index
-            index = assignment.Value(routing.NextVar(index))
-            route_distance += routing.GetArcCostForVehicle(
-                previous_index, index, vehicle_id)
-        plan_output += ' {0} Load({1})\n'.format(
-            manager.IndexToNode(index), route_load)
-        plan_output += 'Distance of the route: {}m\n'.format(route_distance)
-        plan_output += 'Load of the route: {}\n'.format(route_load)
-        print(plan_output)
-        total_distance += route_distance
-        total_load += route_load
-    print('Total distance of all routes: {}m'.format(total_distance))
-    print('Total load of all routes: {}'.format(total_load))
+class CVRP(Thread):
+    solution = None
 
+    def __init__(self, data, first_solution_strategy=None, local_search_metaheuristic=None, time_limit=None):
+        Thread.__init__(self)
+        self.data = data
+        self.first_solution_strategy = first_solution_strategy
+        self.local_search_metaheuristic = local_search_metaheuristic
+        self.time_limit = time_limit
+        self.executionTime = 0
 
-def extract_solution(data, manager, routing, assignment, execution_time):
-    """Prints assignment on console."""
-    result = {
-        "vehicles": [{
-            "route": [],
-            "distance": 0,
-            "load": 0
-        } for x in range(data['num_vehicles'])],
-        "total_distance": 0,
-        "total_load": 0,
-        "trucks_fleet": 0,
-        "execution_time": 0,
-    }
+    def get_solution(self):
+        # Create the routing index manager.
+        self.manager = pywrapcp.RoutingIndexManager(
+            len(self.data['distance_matrix']), self.data['num_vehicles'], self.data['depot'])
 
-    for vehicle_id in range(data['num_vehicles']):
-        index = routing.Start(vehicle_id)
-        while not routing.IsEnd(index):
-            node_index = manager.IndexToNode(index)
-            previous_index = index
-            index = assignment.Value(routing.NextVar(index))
-            distance = routing.GetArcCostForVehicle(
-                previous_index, index, vehicle_id)
-            load = data['demands'][node_index]
-            result["vehicles"][vehicle_id]["route"].append({
-                "id": node_index,
-                "load": load,
-                "distance": distance,
-                "location": data["locations"][node_index]
-            })
-            result["vehicles"][vehicle_id]["distance"] += distance
-            result["vehicles"][vehicle_id]["load"] += load
-            result["total_distance"] += distance
-            result["total_load"] += load
-            result["execution_time"] += execution_time
+        # Create Routing Model.
+        self.routing = pywrapcp.RoutingModel(self.manager)
 
-    result["trucks_fleet"] += data['num_vehicles']
+        # Create and register a transit callback.
+        def distance_callback(from_index, to_index):
+            """Returns the distance between the two nodes."""
+            # Convert from routing variable Index to distance matrix NodeIndex.
+            from_node = self.manager.IndexToNode(from_index)
+            to_node = self.manager.IndexToNode(to_index)
+            return self.data['distance_matrix'][from_node][to_node]
 
-    return result
+        transit_callback_index = self.routing.RegisterTransitCallback(
+            distance_callback)
 
+        # Define cost of each arc.
+        self.routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
-def main(argv):
-    """Solve the CVRP problem."""
+        # Add Capacity constraint.
+        def demand_callback(from_index):
+            """Returns the demand of the node."""
+            # Convert from routing variable Index to demands NodeIndex.
+            from_node = self.manager.IndexToNode(from_index)
+            return self.data['demands'][from_node]
 
-    # Instantiate the data problem.
-    with open("datasets/{}.json".format(argv[0]), 'r') as json_file:
-        data = json.load(json_file)
+        demand_callback_index = self.routing.RegisterUnaryTransitCallback(
+            demand_callback)
 
-    with open("algorithms.json".format(argv[1]), 'r') as json_file:
-        algorithms = json.load(json_file)
-        algorithm = [algorithms['algorithms']
-                     [int(argv[1])], algorithms['heuristique'][int(argv[1])]]
+        self.routing.AddDimensionWithVehicleCapacity(
+            demand_callback_index,
+            0,  # null capacity slack
+            self.data['vehicle_capacities'],  # vehicle maximum capacities
+            True,  # start cumul to zero
+            'Capacity')
 
-    # Create the routing index manager.
-    manager = pywrapcp.RoutingIndexManager(
-        len(data['distance_matrix']), data['num_vehicles'], data['depot'])
+        self.search_parameters = pywrapcp.DefaultRoutingSearchParameters()
 
-    # Create Routing Model.
-    routing = pywrapcp.RoutingModel(manager)
+        if self.first_solution_strategy:
+            self.search_parameters.first_solution_strategy = self.first_solution_strategy
 
-    # Create and register a transit callback.
+        if self.local_search_metaheuristic:
+            self.search_parameters.local_search_metaheuristic = self.local_search_metaheuristic
 
-    def distance_callback(from_index, to_index):
-        """Returns the distance between the two nodes."""
-        # Convert from routing variable Index to distance matrix NodeIndex.
-        from_node = manager.IndexToNode(from_index)
-        to_node = manager.IndexToNode(to_index)
-        return data['distance_matrix'][from_node][to_node]
+        if self.time_limit:
+            self.search_parameters.time_limit.seconds = self.time_limit
 
-    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+        # self.search_parameters.log_search = True
 
-    # Define cost of each arc.
-    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+        self.executionTime = time.time()
+        # Solve the problem.
+        assignment = self.routing.SolveWithParameters(self.search_parameters)
 
-    # Add Capacity constraint.
+        # Result time benchmark
+        self.executionTime = time.time() - self.executionTime
+        # Parse the solution.
+        if assignment:
+            return self.parse_solution(assignment)
 
-    def demand_callback(from_index):
-        """Returns the demand of the node."""
-        # Convert from routing variable Index to demands NodeIndex.
-        from_node = manager.IndexToNode(from_index)
-        return data['demands'][from_node]
+    def parse_solution(self, assignment):
+        result = {
+            "vehicles": [{
+                "route": [],
+                "distance": 0,
+                "load": 0
+            } for x in range(self.data['num_vehicles'])],
+            "total_distance": 0,
+            "total_load": 0,
+            "trucks_fleet": 0,
+            "execution_time": 0,
+        }
 
-    demand_callback_index = routing.RegisterUnaryTransitCallback(
-        demand_callback)
-    routing.AddDimensionWithVehicleCapacity(
-        demand_callback_index,
-        0,  # null capacity slack
-        data['vehicle_capacities'],  # vehicle maximum capacities
-        True,  # start cumul to zero
-        'Capacity')
+        for vehicle_id in range(self.data['num_vehicles']):
+            index = self.routing.Start(vehicle_id)
+            while not self.routing.IsEnd(index):
+                node_index = self.manager.IndexToNode(index)
+                previous_index = index
+                index = assignment.Value(self.routing.NextVar(index))
+                distance = self.routing.GetArcCostForVehicle(
+                    previous_index, index, vehicle_id)
+                load = self.data['demands'][node_index]
+                result["vehicles"][vehicle_id]["route"].append({
+                    "id": node_index,
+                    "load": load,
+                    "distance": distance,
+                    "location": self.data["locations"][node_index]
+                })
+                result["vehicles"][vehicle_id]["distance"] += distance
+                result["vehicles"][vehicle_id]["load"] += load
+                result["total_distance"] += distance
+                result["total_load"] += load
 
-    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-    if algorithm[1] == "True":
-        search_parameters.first_solution_strategy = (
-            eval("routing_enums_pb2.FirstSolutionStrategy." + algorithm[0]))
-    else:
-        search_parameters.local_search_metaheuristic = (
-            eval("routing_enums_pb2.LocalSearchMetaheuristic." + algorithm[0]))
-        search_parameters.time_limit.seconds = 5
+        result["trucks_fleet"] += self.data['num_vehicles']
+        result["execution_time"] += self.executionTime
 
-    search_parameters.log_search = True
-
-    t0 = time.time()
-
-    # Execution time
-    startTime = datetime.now()
-    # Solve the problem.
-    assignment = routing.SolveWithParameters(search_parameters)
-    elapsedTime = datetime.now() - startTime
-
-    executionTime = time.time() - t0
-    # Print solution on console.
-    if assignment:
-        solution = extract_solution(
-            data, manager, routing, assignment, executionTime)
-        with open("results/{}_{}.json".format(argv[0], algorithm[0]), 'w') as json_file:
-            json.dump(solution, json_file, indent=2)
-
-    print(elapsedTime.total_seconds())
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+        return result
