@@ -1,8 +1,10 @@
+import time
 from random import randrange
 from datetime import datetime, time, timedelta
 import math
 import sys
 import json
+from ortools.constraint_solver import routing_enums_pb2
 
 
 def compute_euclidean_distance_matrix(locations):
@@ -47,9 +49,17 @@ def generate_vehicle_capacities(n, capacity):
     return vehicle_capacities
 
 
-def create_data_model():
-    """Stores the data for the problem."""
-
+def generate_data(cities, trucks, truck_capacity, city_demand_min, city_demand_max):
+    data = {}
+    data['locations'] = generate_locations(cities)
+    data['distance_matrix'] = compute_euclidean_distance_matrix(
+        data['locations'])
+    data['demands'] = generate_demands(
+        cities, city_demand_min, city_demand_max)
+    data['vehicle_capacities'] = generate_vehicle_capacities(
+        trucks, truck_capacity)
+    data['num_vehicles'] = len(data['vehicle_capacities'])
+    data['depot'] = 0
     return data
 
 
@@ -64,16 +74,8 @@ def main(argv):
     print("Generating dataset with {} cities demanding {} to {} objects delivred by {} trucks of {} objects capacity".format(
         cities, city_demand_min, city_demand_max, trucks, truck_capacity))
 
-    data = {}
-
-    data['locations'] = generate_locations(cities)
-    data['distance_matrix'] = compute_euclidean_distance_matrix(data['locations'])
-    data['demands'] = generate_demands(
-        cities, city_demand_min, city_demand_max)
-    data['vehicle_capacities'] = generate_vehicle_capacities(
-        trucks, truck_capacity)
-    data['num_vehicles'] = len(data['vehicle_capacities'])
-    data['depot'] = 0
+    data = generate_data(cities, trucks, truck_capacity,
+                         city_demand_min, city_demand_max)
 
     with open("datasets/{}.json".format(filename), 'w') as json_file:
         json.dump(data, json_file, indent=2)
