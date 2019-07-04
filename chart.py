@@ -116,13 +116,22 @@ class Chart:
     def showScatterPlot(self, stat):
         x = []
         y = []
+        averageX = []
+        averageY = []
+        listY = []
 
         for bundles in stat:
             for bundle in bundles['stats']:
                 x.append(bundles['cities'])
                 y.append(bundle['execution_time'])
+                listY.append(bundle['execution_time'])
+            averageX.append(x[-1])
+            averageY.append(np.mean(listY))
+            listY.clear()
 
-            plt.scatter(x, y)
+        plt.scatter(x, y)
+        plt.plot(averageX, averageY)
+
 
         plt.xlabel('Cities')
         plt.ylabel('Time')
