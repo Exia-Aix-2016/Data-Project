@@ -113,3 +113,24 @@ Les points suivants doivent être abordés dans la présentation :
 - Présentation vulgarisée de l'étude statistique, focus sur les résultats les plus significatifs
 
 La soutenance aura lieu en anglais.
+
+
+# Utilisation
+
+## Génération de dataset
+
+```
+py .\dataset-generator.py small 10 0.2 15 1 5
+```
+
+## Génération de solution
+
+```
+py .\cvrp.py small
+```
+
+## Visualisation des routes
+
+```
+py .\graph.py small 1
+```
