@@ -5,6 +5,7 @@ import pylab
 import sys
 import json
 from scipy import interpolate
+import random
 
 
 class Chart:
