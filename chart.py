@@ -12,6 +12,10 @@ class Chart:
     def __init__(self, store):
         self.store = store
 
+    def norm(self, data):
+        y = (max(data)-min(data))
+        return list(map(lambda x: x/y, data))
+
     def showQuality(self):
         trucks_fleet = 0
         trucks_used = 0
@@ -19,11 +23,17 @@ class Chart:
         whole_distance = 0
         quality = 0
         data = []
+        qualities = []
+        executionTimes = []
+        trucks_useds = []
+        total_distances = []
+
         for algo, solution in self.store.solutions.items():
 
             trucks_fleet = int(solution['trucks_fleet'])
             total_distance = int(solution['total_distance'])
             executionTime = int(solution['execution_time'])
+
             # CALCULE wholedistance & truckused
             for truck in solution["vehicles"]:
                 if(len(truck["route"]) > 1):
@@ -42,8 +52,13 @@ class Chart:
             quality = (total_distance / whole_distance) * \
                 (trucks_used / trucks_fleet)
 
-            data.append(
-                [quality, executionTime, trucks_used, total_distance])
+            qualities.append(quality)
+            executionTimes.append(executionTime)
+            trucks_useds.append(trucks_used)
+            total_distances.append(total_distance)
+
+        for q, e, tr, to in zip(self.norm(qualities), self.norm(executionTimes), self.norm(trucks_useds), self.norm(total_distances)):
+            data.append([q, e, tr, to])
 
             # PRINT HISTO
         x = [0, 1, 2, 3]
@@ -54,7 +69,7 @@ class Chart:
 
             color = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
                      for i in range(8)]
-            print(row)
+
             X = np.arange(len(row))
 
             plt.bar(X + i * gap, row,
