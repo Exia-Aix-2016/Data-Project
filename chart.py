@@ -4,6 +4,7 @@ import numpy as np
 import pylab
 import sys
 import json
+from scipy import interpolate
 
 
 class Chart:
@@ -103,17 +104,16 @@ class Chart:
         first_quartile = round(np.percentile(y, 25))
         third_quartile = round(np.percentile(y, 75))
 
-
-        plt.legend(title="average: " + str(round(average, 2)) + 
-                    "\nstandard_deviation: " + str(round(standard_deviation, 2)) +
-                    "\nvariance: " + str(round(variance, 2)) + 
-                    "\nmedian: " + str(round(median, 2)) +
-                    "\nfirst_quartile: " + str(round(first_quartile, 2)) + 
-                    "\nthird_quartile: " + str(round(third_quartile, 2)) )
+        plt.legend(title="average: " + str(round(average, 2)) +
+                   "\nstandard_deviation: " + str(round(standard_deviation, 2)) +
+                   "\nvariance: " + str(round(variance, 2)) +
+                   "\nmedian: " + str(round(median, 2)) +
+                   "\nfirst_quartile: " + str(round(first_quartile, 2)) +
+                   "\nthird_quartile: " + str(round(third_quartile, 2)))
 
         plt.show()
 
-    def showScatterPlot(self, stat):
+    def showScatterPlot(self, stat, variable):
         x = []
         y = []
         averageX = []
@@ -123,18 +123,20 @@ class Chart:
         for bundles in stat:
             for bundle in bundles['stats']:
                 x.append(bundles['cities'])
-                y.append(bundle['execution_time'])
-                listY.append(bundle['execution_time'])
+                y.append(bundle[variable])
+                listY.append(bundle[variable])
             averageX.append(x[-1])
             averageY.append(np.mean(listY))
             listY.clear()
 
-        plt.scatter(x, y)
-        plt.plot(averageX, averageY)
+        spl = interpolate.UnivariateSpline(averageX, averageY)
+        xs = np.linspace(min(averageX), max(averageX) * 1.5, 1000)
+        plt.plot(xs, spl(xs), 'b', lw=3)
 
+        plt.scatter(x, y, c='r')
 
         plt.xlabel('Cities')
-        plt.ylabel('Time')
+        plt.ylabel(variable)
         plt.title('Scatter Plot Diagram')
 
         plt.show()

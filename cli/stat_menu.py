@@ -46,6 +46,15 @@ class StatMenu(Menu):
         self.selectAlgoMenu.execute()
         if action == "SCATTER_PLOT":
             scatter_plot_questions = [{
+                "type": "list",
+                "name": "variable",
+                'message': 'Which variable ?',
+                "choices": [
+                    {"name": "Execution time", "value": "execution_time"},
+                    {"name": "Distance", "value": "distance"},
+                    {"name": "Number of trucks", "value": "trucks"}
+                ]
+            }, {
                 'type': 'input',
                 'name': 'cities_start',
                 'message': 'How many cities to start ?',
@@ -76,7 +85,7 @@ class StatMenu(Menu):
                     time_limit=answers.get("time_limit", 30),
                     local_search_metaheuristic=self.store.local_search_metaheuristic(),
                     first_solution_strategy=self.store.first_solution_strategy()).get_stats()
-            self.chart.showScatterPlot(stats)
+            self.chart.showScatterPlot(stats, answers["variable"])
         elif action == "UNIFORMITY":
             uniformity_questions = [{
                 'type': 'input',
