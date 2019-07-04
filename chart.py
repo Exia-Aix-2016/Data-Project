@@ -4,6 +4,7 @@ import numpy as np
 import pylab
 import sys
 import json
+from scipy import interpolate
 
 
 class Chart:
@@ -164,19 +165,30 @@ class Chart:
 
         plt.show()
 
-    def showScatterPlot(self, stat):
+    def showScatterPlot(self, stat, variable):
         x = []
         y = []
+        averageX = []
+        averageY = []
+        listY = []
 
         for bundles in stat:
             for bundle in bundles['stats']:
                 x.append(bundles['cities'])
-                y.append(bundle['execution_time'])
+                y.append(bundle[variable])
+                listY.append(bundle[variable])
+            averageX.append(x[-1])
+            averageY.append(np.mean(listY))
+            listY.clear()
 
-            plt.scatter(x, y)
+        spl = interpolate.UnivariateSpline(averageX, averageY)
+        xs = np.linspace(min(averageX), max(averageX) * 1.5, 1000)
+        plt.plot(xs, spl(xs), 'b', lw=3)
+
+        plt.scatter(x, y, c='r')
 
         plt.xlabel('Cities')
-        plt.ylabel('Time')
+        plt.ylabel(variable)
         plt.title('Scatter Plot Diagram')
 
         plt.show()

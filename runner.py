@@ -22,15 +22,15 @@ class Runner():
         solution = CVRP(data, self.first_solution_strategy,
                         self.local_search_metaheuristic, self.time_limit).get_solution()
 
-        return solution_stat(solution)
+        return solution_stat(solution) if solution else None
 
     def get_config_stats(self, generator):
         data = [
             generator.get_data() for i in range(self.iterations)
         ]
 
-        solution_stats = list(self.executor.map(
-            self.get_solution_stats, data))
+        solution_stats = filter(None, list(self.executor.map(
+            self.get_solution_stats, data)))
         return config_stat(solution_stats, generator)
 
     def get_stats(self):
