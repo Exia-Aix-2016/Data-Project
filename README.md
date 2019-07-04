@@ -114,23 +114,6 @@ Les points suivants doivent être abordés dans la présentation :
 
 La soutenance aura lieu en anglais.
 
+#Lien de notre étude :
 
-# Utilisation
-
-## Génération de dataset
-
-```
-py .\dataset-generator.py small 10 0.2 15 1 5
-```
-
-## Génération de solution
-
-```
-py .\cvrp.py small
-```
-
-## Visualisation des routes
-
-```
-py .\graph.py small 1
-```
+https://github.com/Exia-Aix-2016/Data-Project/blob/master/ProjetDATA.ipynb
