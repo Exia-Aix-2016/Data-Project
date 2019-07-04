@@ -96,6 +96,21 @@ class Chart:
         plt.title('Uniformity Diagram')
         plt.ylabel("Time")
 
+        average = np.mean(y)
+        standard_deviation = np.std(y)
+        variance = np.var(y)
+        median = np.median(y)
+        first_quartile = round(np.percentile(y, 25))
+        third_quartile = round(np.percentile(y, 75))
+
+
+        plt.legend(title="average: " + str(round(average, 2)) + 
+                    "\nstandard_deviation: " + str(round(standard_deviation, 2)) +
+                    "\nvariance: " + str(round(variance, 2)) + 
+                    "\nmedian: " + str(round(median, 2)) +
+                    "\nfirst_quartile: " + str(round(first_quartile, 2)) + 
+                    "\nthird_quartile: " + str(round(third_quartile, 2)) )
+
         plt.show()
 
     def showScatterPlot(self, stat):
