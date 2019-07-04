@@ -4,6 +4,7 @@ from .utils import toInt, toFloat
 from .dataset_menu import DatasetMenu
 from .visualization_menu import VisualizationMenu
 from .stat_menu import StatMenu
+from .solution_menu import SolutionMenu
 from cvrpg import CVRPG
 from complexity import Complexity
 
@@ -13,6 +14,7 @@ class MainMenu(Menu):
     def __init__(self, store):
         Menu.__init__(self, store, loop=True)
         self.datasetMenu = DatasetMenu(store)
+        self.solutionMenu = SolutionMenu(store)
         self.visualizationMenu = VisualizationMenu(store)
         self.statMenu = StatMenu(store)
 
@@ -20,13 +22,16 @@ class MainMenu(Menu):
         choices = [{
             'name': 'Manage dataset',
             'value': 'dataset',
+        }, {
+            'name': 'Manage solutions',
+            'value': 'solutions',
         }]
 
-        if self.store.data:
-            choices.append({
-                'name': 'Find a solution',
-                'value': 'process',
-            })
+        # if self.store.data:
+        #     choices.append({
+        #         'name': 'Find a solution',
+        #         'value': 'process',
+        #     })
 
         choices.append({
             'name': 'Find a complexity',
@@ -49,13 +54,11 @@ class MainMenu(Menu):
     def on_action(self, action):
         if action == "dataset":
             self.datasetMenu.execute()
-        if action == "process":
-            with self.spinner:
-                self.store.solutions = CVRPG(
-                    self.store.data, 5).get_solutions()
-        if action == "visualize":
+        elif action == "solutions":
+            self.solutionMenu.execute()
+        elif action == "visualize":
             self.visualizationMenu.execute()
-        if action == "complexity":
+        elif action == "complexity":
             answers = prompt([
                 {
                     "type": "input",
