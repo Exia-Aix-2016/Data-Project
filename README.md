@@ -114,6 +114,6 @@ Les points suivants doivent être abordés dans la présentation :
 
 La soutenance aura lieu en anglais.
 
-#Lien de notre étude :
+# Lien de notre étude :
 
 https://github.com/Exia-Aix-2016/Data-Project/blob/master/ProjetDATA.ipynb
