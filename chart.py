@@ -18,10 +18,6 @@ class Chart:
         return list(map(lambda x: x/mx, data))
 
     def showQuality(self):
-        trucks_fleet = 0
-        trucks_used = 0
-        total_distance = 0
-        whole_distance = 0
         quality = 0
         data = []
         qualities = []
@@ -29,8 +25,19 @@ class Chart:
         trucks_useds = []
         total_distances = []
 
-        for algo, solution in self.store.solutions.items():
+        whole_distance = 0
+        indexX = 0
+        indexY = 0
+        for i in self.store.data["distance_matrix"]:
+            for j in i:
+                if indexX > indexY:
+                    whole_distance += j
+                indexX += 1
+            indexX = 0
+            indexY += 1
 
+        for algo, solution in self.store.solutions.items():
+            trucks_used = 0
             trucks_fleet = int(solution['trucks_fleet'])
             total_distance = int(solution['total_distance'])
             executionTime = int(solution['execution_time'])
@@ -39,16 +46,6 @@ class Chart:
             for truck in solution["vehicles"]:
                 if(len(truck["route"]) > 1):
                     trucks_used += 1
-            whole_distance = 0
-            indexX = 0
-            indexY = 0
-            for i in self.store.data["distance_matrix"]:
-                for j in i:
-                    if indexX > indexY:
-                        whole_distance += j
-                    indexX += 1
-                indexX = 0
-                indexY += 1
 
             quality = (total_distance / whole_distance) * \
                 (trucks_used / trucks_fleet)
