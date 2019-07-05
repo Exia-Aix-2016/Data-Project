@@ -15,6 +15,8 @@
 
 # The problem
 
++++
+
 ![cvrp](https://developers.google.com/optimization/images/routing/cvrp.svg)
 
 +++
@@ -23,11 +25,11 @@
 
 ---
 
-# Google's solution
-
-## OR-Tools
+# Google's solution: OR-Tools
 
 ![orLogo](https://developers.google.com/optimization/images/orLogo.png)
+
++++
 
 Open source software for combinatorial optimization.
 
@@ -63,7 +65,10 @@ The intersting part
     assignment = routing.SolveWithParameters(search_parameters)
 ```
 
-@[1-2](manager) @[4-9](dimension) @[12-13](strategy) @[15](solver)
+@[1-2](manager)
+@[4-9](dimension)
+@[12-13](strategy)
+@[15](solver)
 
 Note:
 
@@ -74,22 +79,40 @@ Note:
 
 # Our tools
 
-- Manage dataset
-  - Generate
-  - Import
-  - Export
-- Manage solutions
-  - Generate
-  - Import
-  - Export
-- Find a complexity
-- Visualize the solution
-  - Graph
-  - Graph without depot
-  - Quality chart
-- Stats
-  - Show scatter plot
-  - Show uniformity
++++
+
+## Manage dataset
+
+- Generate
+- Import
+- Export
+
++++
+
+## Manage solutions
+
+- Generate
+- Import
+- Export
+
++++
+
+## Find a complexity
+
++++
+
+## Visualize the solution
+
+- Graph
+- Graph without depot
+- Quality chart
+
++++
+
+## Stats
+
+- Show scatter plot
+- Show uniformity
 
 +++
 
@@ -103,6 +126,8 @@ Note:
 
 # Our researches
 
++++
+
 ![scatter](https://raw.githubusercontent.com/Exia-Aix-2016/Data-Project/master/screenshots/scatter_plot/distance/guided_local_search.png)
 
 +++
@@ -115,7 +140,7 @@ Note:
 
 ---
 
-# Live demonstration
+# Live demo
 
 ---
 
