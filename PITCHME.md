@@ -25,7 +25,9 @@
 
 ---
 
-# Google's solution: OR-Tools
+# Google's solution
+
+## OR-Tools
 
 ![orLogo](https://developers.google.com/optimization/images/orLogo.png)
 
