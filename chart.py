@@ -146,7 +146,7 @@ class Chart:
             averageY.append(np.mean(listY))
             listY.clear()
 
-        spl = interpolate.UnivariateSpline(averageX, averageY)
+        spl = interpolate.UnivariateSpline(averageX, averageY, s=0)
         xs = np.linspace(min(averageX), max(averageX) * 1.5, 1000)
         plt.plot(xs, spl(xs), 'b', lw=3)
 
