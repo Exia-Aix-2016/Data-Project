@@ -77,6 +77,12 @@ Note:
 - The index manager keeps track of the solver's internal variables corresponding to locations
 - The routing solver uses an object called a dimension to keep track of quantities that accumulate along a vehicle's route
 
++++
+
+### Solver
+
+![guidedLocalSearch](https://www.researchgate.net/profile/Sergio_Consoli/publication/49399511/figure/fig7/AS:644639283503106@1530705390538/Guided-Local-Search-strategy-escaping-from-traps-increasing-the-relative-objective.png)
+
 ---
 
 # Our tools
